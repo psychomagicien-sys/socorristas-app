@@ -1,6 +1,16 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { redirect } from 'next/navigation'
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ secret?: string }>
+}) {
+  const { secret } = await searchParams
+  if (secret !== process.env.ADMIN_SECRET) {
+    redirect('/')
+  }
+
   const admin = createAdminClient()
 
   const [

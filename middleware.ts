@@ -29,13 +29,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    const secret = request.nextUrl.searchParams.get('secret')
-    if (secret !== process.env.ADMIN_SECRET) {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
-
   if (!user && request.nextUrl.pathname.startsWith('/session')) {
     const redirectTo = request.nextUrl.pathname
     return NextResponse.redirect(new URL(`/login?redirectTo=${redirectTo}`, request.url))
@@ -45,5 +38,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/session/:path*', '/admin/:path*', '/admin'],
+  matcher: ['/dashboard/:path*', '/session/:path*'],
 }
