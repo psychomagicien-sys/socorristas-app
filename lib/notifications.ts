@@ -15,11 +15,17 @@ export async function sendWhatsApp(to: string, message: string) {
 
   const client = twilio(sid, token)
 
-  await client.messages.create({
-    from: process.env.TWILIO_WHATSAPP_FROM ?? 'whatsapp:+14155238886',
-    to: `whatsapp:${to}`,
-    body: message,
-  })
+  try {
+    await client.messages.create({
+      from: process.env.TWILIO_WHATSAPP_FROM ?? 'whatsapp:+14155238886',
+      to: `whatsapp:${to}`,
+      body: message,
+    })
+    console.log('[WhatsApp] Message envoyé à', to)
+  } catch (err) {
+    console.error('[WhatsApp] Erreur envoi:', err)
+    throw err // permet à l'appelant de détecter l'échec
+  }
 }
 
 // ─── Email via Resend ──────────────────────────────────────────────────────

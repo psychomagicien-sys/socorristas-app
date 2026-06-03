@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
+import { sendEmail, sendWhatsApp } from '@/lib/notifications'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -43,6 +44,43 @@ export async function POST(req: NextRequest) {
       .from('sessions')
       .update({ status: 'confirmed' })
       .eq('id', session_id)
+
+    // Notifier le client que sa session est confirmée
+    const { data: authUser } = await admin.auth.admin.getUserById(session.person_id)
+    const { data: personProfile } = await admin
+      .from('profiles')
+      .select('first_name')
+      .eq('id', session.person_id)
+      .single()
+
+    const { data: practProfile } = await admin
+      .from('profiles')
+      .select('first_name')
+      .eq('id', session.practitioner_id)
+      .single()
+
+    const sessionUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://socorristas-app.vercel.app'}/session/${session_id}`
+    const personName = (personProfile as { first_name: string } | null)?.first_name ?? 'cliente'
+    const practName = (practProfile as { first_name: string } | null)?.first_name ?? 'tu Socorrista'
+
+    if (authUser?.user?.email) {
+      await Promise.allSettled([
+        sendEmail({
+          to: authUser.user.email,
+          subject: '✅ Tu Socorrista ha aceptado — ¡entra ahora!',
+          html: `
+            <h2>¡${practName} ha aceptado tu sesión!</h2>
+            <p>Hola <strong>${personName}</strong>,</p>
+            <p>Tu Socorrista <strong>${practName}</strong> está listo para acompañarte ahora mismo.</p>
+            <a href="${sessionUrl}" style="background:#e11d48;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:12px;">
+              Entrar a la sesión →
+            </a>
+            <p style="color:#999;font-size:12px;margin-top:24px;">En caso de peligro inmediato, llama al 112.</p>
+          `,
+        }),
+      ])
+    }
+
     return NextResponse.json({ success: true, status: 'confirmed' })
   }
 
