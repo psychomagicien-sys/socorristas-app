@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/expire-sessions",
-      "schedule": "* * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

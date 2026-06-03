@@ -37,12 +37,19 @@ export default function WaitingRoom({ sessionId, initialStatus, practitionerName
     return () => { supabase.removeChannel(channel) }
   }, [sessionId, router])
 
-  // Compte à rebours
+  // Compte à rebours + déclenchement expiration après 3 minutes
   useEffect(() => {
     if (status !== 'pending_practitioner') return
     const interval = setInterval(() => {
       setTimeLeft((t) => {
-        if (t <= 1) { clearInterval(interval); return 0 }
+        if (t <= 1) {
+          clearInterval(interval)
+          // Déclencher le remboursement automatique
+          fetch('/api/cron/expire-sessions', {
+            headers: { authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET ?? 'socorristas-cron-2026'}` }
+          }).catch(() => {})
+          return 0
+        }
         return t - 1
       })
     }, 1000)
