@@ -29,9 +29,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  if (!user && request.nextUrl.pathname.startsWith('/session')) {
+    const redirectTo = request.nextUrl.pathname
+    return NextResponse.redirect(new URL(`/login?redirectTo=${redirectTo}`, request.url))
+  }
+
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: ['/dashboard/:path*', '/session/:path*'],
 }
