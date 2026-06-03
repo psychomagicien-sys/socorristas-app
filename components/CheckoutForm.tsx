@@ -59,7 +59,11 @@ export default function CheckoutForm({ sessionId, practitionerName }: Props) {
       </button>
 
       <p className="text-xs text-stone-400 text-center">
-        Pago seguro con Stripe · Los Socorristas no son profesionales sanitarios
+        Al pagar, aceptas nuestros{' '}
+        <a href="/legal" target="_blank" className="underline hover:text-stone-600">Términos de uso</a>
+        {' '}y la{' '}
+        <a href="/privacidad" target="_blank" className="underline hover:text-stone-600">Política de privacidad</a>.
+        Pago seguro con Stripe.
       </p>
     </form>
   )
