@@ -97,17 +97,23 @@ export async function notifyPractitioner({
       </a>
     `
 
-  // Envoyer WhatsApp + Email en parallèle
-  await Promise.allSettled([
-    practitionerPhone ? sendWhatsApp(practitionerPhone, whatsappMessage) : Promise.resolve(),
-    sendEmail({
-      to: practitionerEmail,
-      subject: isAhora
-        ? '🆘 Nueva sesión — responde en 3 minutos'
-        : '📅 Nueva sesión reservada',
-      html: emailHtml,
-    }),
-  ])
+  // Envoyer WhatsApp d'abord, puis Email (toujours, comme fallback garanti)
+  if (practitionerPhone) {
+    try {
+      await sendWhatsApp(practitionerPhone, whatsappMessage)
+    } catch (err) {
+      console.error('[notifyPractitioner] WhatsApp échoué, envoi email de secours:', err)
+    }
+  }
+
+  // Email toujours envoyé (confirmation ou fallback)
+  await sendEmail({
+    to: practitionerEmail,
+    subject: isAhora
+      ? '🆘 Nueva sesión — responde en 3 minutos'
+      : '📅 Nueva sesión reservada',
+    html: emailHtml,
+  })
 }
 
 // ─── Email de remboursement au client ─────────────────────────────────────
