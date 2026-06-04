@@ -46,7 +46,7 @@ export async function sendEmail({
 
   const resend = new Resend(process.env.RESEND_API_KEY)
   await resend.emails.send({
-    from: 'Socorristas Emocionales <noreply@socorristasemocionales.com>',
+    from: 'Socorristas Emocionales <hola@tusocorrista.com>',
     to,
     subject,
     html,
